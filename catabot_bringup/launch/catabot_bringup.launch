@@ -1,0 +1,127 @@
+<launch>
+  <!-- device usage flags -->
+  <arg name="use_lidar" default="true"/>
+  <arg name="lidar_ouster" default="true"/>
+  <arg name="use_surface_camera" default="true"/>
+  <arg name="use_underwater_camera" default="false"/>
+  <arg name="use_sonde" default="false"/>
+  <arg name="use_sonar" default="false"/>
+  <arg name="use_sidescan" default="false"/>
+  <arg name="use_logging" default="true"/>  
+  <arg name="use_pixhawk" default="true"/>
+
+  <!-- time delays -->
+  <arg name="usb_cam_node_start_delay" default="3.0" />
+  <arg name="usb_cam_underwater_start_delay" default="1.0" />
+  
+  <!-- usb parameters under udev rules --> 
+  <!-- TODO underwater cam -->
+  <arg name="usb_underwater" default="/dev/video2"/>
+  
+  <arg name="usb_surface" default="/dev/video0"/> <!-- /dev/surface_cam"/ -->
+  <arg name="usb_sonde" default="/dev/ysi_sonde"/>
+  <arg name="usb_sonar" default="/dev/sonar"/>
+  <arg name="usb_pixhawk" default="udp://:14550@"/>
+  <arg name="pixhawk_baudrate" default="57600" />
+
+  <!-- miscellaneous arguments -->
+  <arg name="ouster_host" default="os-122525001750.local" />
+  <arg name="udp_dest" default="169.254.162.114" /> <!-- host of catabot-2 -->
+  <arg name="lidar_mode" default="1024x10" />
+  <!-- <arg name="metadata" default="/home/catabot-5/datalog/metadata/ouster_metadata_$(arg lidar_mode).json" /> -->
+  <arg name="viz" default="false" /> <!-- ouster rviz -->
+
+  <!-- mavros node -->
+  <group if="$(arg use_pixhawk)">
+      <include file="$(find mavros)/launch/apm.launch">
+          <!-- <arg name="fcu_url" value="$(arg usb_pixhawk):$(arg pixhawk_baudrate)"/> -->
+          <arg name="fcu_url" value="$(arg usb_pixhawk)"/>
+      </include>
+  </group>
+
+  <!-- sonde node  -->
+  <group if="$(arg use_sonde)">
+      <include file="$(find ysi_exo)/launch/ysi_exo.launch">
+          <arg name="serial_port" value="$(arg usb_sonde)"/>
+      </include>
+  </group>
+
+  <!-- sonar node-->
+  <group if="$(arg use_sonar)">
+    <node pkg="nmea_depth_transducer" type="nmea_depth_transducer_node" name="nmea_depth_transducer" >
+      <param name="serial_port" value="$(arg usb_sonar)" />
+    </node>
+  </group>
+  
+  <!-- Transform for getting the lidar tf in place -->
+  <node if="$(arg use_lidar)" pkg="tf" type="static_transform_publisher" name="lidar_tf_broadcaster" args="-0.8 0 0.515 0 0 0 base_link velodyne 100" />
+  <node if="$(arg use_surface_camera)" pkg="tf" type="static_transform_publisher" name="surfcam_tf_broadcaster" args="-0.8 0 0.4 0 0 0 base_link surface_cam 100" />
+
+  <!-- Lidar node -->
+  <group if="$(arg use_lidar)">
+      <!-- Ouster use -->
+      <!-- sudo route del -net 169.254.0.0 gw 0.0.0.0 netmask 255.255.0.0 dev wlp0s20f3 -->
+      <!-- sudo route add -net 169.254.0.0/16 dev eno1 -->
+      <group if="$(arg lidar_ouster)">
+          <include file="$(find ouster_ros)/launch/driver.launch">
+            <arg name="sensor_hostname" value="$(arg ouster_host)" />
+           <arg name="udp_dest" value="$(arg udp_dest)" />
+            <!-- <arg name="metadata" value="$(arg metadata)" /> -->
+            <!-- <arg name="lidar_mode" value="$(arg lidar_mode)" /> -->
+            <arg name="timestamp_mode" value="TIME_FROM_ROS_TIME" />
+            <arg name="viz" value="$(arg viz)" />
+          </include>
+      </group>
+      
+      <!-- Velodyne use -->
+      <group unless="$(arg lidar_ouster)">
+          <include file="$(find velodyne_pointcloud)/launch/VLP16_points.launch">
+            <arg name="calibration" value="$(find velodyne_pointcloud)/params/VLP16db.yaml" />  
+          </include>
+      </group>
+  </group>
+
+  <!-- Surface Camera node -->
+  <group if="$(arg use_surface_camera)">
+      <node name="usb_cam_surface" pkg="usb_cam" type="usb_cam_node" launch-prefix="bash -c 'sleep $(arg usb_cam_node_start_delay); $0 $@'" >
+          <param name="video_device" value="$(arg usb_surface)" />
+          <param name="image_width" value="640" />
+          <param name="image_height" value="480" />
+          <param name="pixel_format" value="yuyv" />
+          <!--param name="io_method" value="mmap"/-->
+          <param name="auto_focus" value="false"/>
+          <param name="framerate" value="30"/>
+          <param name="camera_frame_id" value="surface_cam"/>
+          <param name="autoexposure" value="true"/>      
+      </node>
+  </group>
+
+  <!-- Underwater Camera node -->
+  <group if="$(arg use_underwater_camera)">
+      <node name="usb_cam_underwater" pkg="usb_cam" type="usb_cam_node" output="screen" launch-prefix="bash -c 'sleep $(arg usb_cam_underwater_start_delay); $0 $@'" >
+          <param name="video_device" value="$(arg usb_underwater)" />
+          <param name="image_width" value="640" />
+          <param name="image_height" value="360" />
+          <param name="pixel_format" value="yuyv" />
+          <!-- param name="io_method" value="mmap"/ -->
+          <param name="auto_focus" value="false"/>
+          <param name="framerate" value="30"/>
+          <param name="camera_frame_id" value="underwater_cam"/>
+          <param name="autoexposure" value="false"/>
+      </node>
+  </group>
+
+  <!--include file="$(find realsense2_camera)/launch/rs_camera.launch">
+    <arg name="external_manager" value="true"/>
+    <arg name="manager" value="velodyne_nodelet_manager" />
+  </include-->
+  <group if="$(arg use_sidescan)">
+      <include file="$(find imagenex_sidescan)/launch/sidescansonar.launch" />
+  </group>
+
+  <!-- ROSbag Record node -->
+  <group if="$(arg use_logging)">
+      <include file="$(find catabot_bringup)/launch/logger.launch" />
+  </group>
+
+</launch>

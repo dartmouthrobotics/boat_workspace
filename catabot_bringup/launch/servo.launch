@@ -1,0 +1,54 @@
+<launch>
+   <arg name="start_delay" default="0.1" />
+   <arg name="end_delay" default="20" />
+   <arg name="end_delay2" default="20.1" />
+   <arg name="disarm_delay" default="23" />
+   
+   <arg name="forward" default="false" />
+   <arg name="backward" default="false" />
+   <arg name="right" default="false" />
+   <arg name="left" default="false" />
+
+   <node pkg="mavros" type="mavsafety" name="armming" args="arm"/>
+   <!--node if="$(arg robot_forward)" pkg="mavros" type="mavcmd" name="forward_servo_control" args="long 183 1 1500 0 0 0 0 0"/-->
+   
+   <!-- forward experiments -->
+   <group if="$(arg forward)">   
+     <node pkg="mavros" type="mavcmd" name="forward_right" args="long 183 1 1450 0 0 0 0 0" />
+     <node pkg="mavros" type="mavcmd" name="forward_left" args="long 183 3 1550 0 0 0 0 0" launch-prefix="bash -c 'sleep $(arg start_delay); $0 $@' " />
+     
+     <node pkg="mavros" type="mavcmd" name="forward_right_end" args="long 183 1 1500 0 0 0 0 0" launch-prefix="bash -c 'sleep $(arg end_delay); $0 $@' " />
+     <node pkg="mavros" type="mavcmd" name="forward_left_end" args="long 183 3 1500 0 0 0 0 0" launch-prefix="bash -c 'sleep $(arg end_delay2); $0 $@' " />
+   </group>
+
+   <!-- backward experiments -->
+   <group if="$(arg backward)">
+     <node pkg="mavros" type="mavcmd" name="backward_right" args="long 183 1 1550 0 0 0 0 0" />
+     <node pkg="mavros" type="mavcmd" name="backward_left" args="long 183 3 1450 0 0 0 0 0" launch-prefix="bash -c 'sleep $(arg start_delay); $0 $@' " />
+
+     <node pkg="mavros" type="mavcmd" name="backward_right_end" args="long 183 1 1500 0 0 0 0 0" launch-prefix="bash -c 'sleep $(arg end_delay); $0 $@' " />
+     <node pkg="mavros" type="mavcmd" name="bacward_left_end" args="long 183 3 1500 0 0 0 0 0" launch-prefix="bash -c 'sleep $(arg end_delay2); $0 $@' " />
+   </group>
+
+   <!-- right experiments -->
+   <group if="$(arg right)">
+     <node pkg="mavros" type="mavcmd" name="stbdturn_right" args="long 183 1 1450 0 0 0 0 0" />
+     <node pkg="mavros" type="mavcmd" name="stbdturn_left" args="long 183 3 1450 0 0 0 0 0" launch-prefix="bash -c 'sleep $(arg start_delay); $0 $@' " />
+
+     <node pkg="mavros" type="mavcmd" name="stbdturn_right_end" args="long 183 1 1500 0 0 0 0 0" launch-prefix="bash -c 'sleep $(arg end_delay); $0 $@' " />
+     <node pkg="mavros" type="mavcmd" name="stbdtuun_left_end" args="long 183 3 1500 0 0 0 0 0" launch-prefix="bash -c 'sleep $(arg end_delay2); $0 $@' " />
+   </group>
+
+   <!-- left experiments -->
+   <group if="$(arg left)">
+     <node pkg="mavros" type="mavcmd" name="portturn_right" args="long 183 1 1550 0 0 0 0 0" />
+     <node pkg="mavros" type="mavcmd" name="porturn_left" args="long 183 3 1550 0 0 0 0 0" launch-prefix="bash -c 'sleep $(arg start_delay); $0 $@' " />
+
+     <node pkg="mavros" type="mavcmd" name="portturn_right_end" args="long 183 1 1500 0 0 0 0 0" launch-prefix="bash -c 'sleep $(arg end_delay); $0 $@' " />
+     <node pkg="mavros" type="mavcmd" name="porttuun_left_end" args="long 183 3 1500 0 0 0 0 0" launch-prefix="bash -c 'sleep $(arg end_delay2); $0 $@' " />
+   </group>
+
+
+   <node pkg="mavros" type="mavsafety" name="disarmming" args="disarm" launch-prefix="bash -c 'sleep $(arg disarm_delay); $0 $@' " />
+   
+</launch>

@@ -1,0 +1,67 @@
+<launch>
+  <arg name="use_lidar" default="true"/>
+  <arg name="use_rgbd_camera" default="true"/>
+  <arg name="usb_cam_node_start_delay" default="3.0" />
+  <arg name="usb_cam_underwater_start_delay" default="1.0" />
+  <arg name="usb_underwater" default="/dev/underwater_cam"/>
+  <arg name="usb_surface" default="/dev/surface_cam"/>
+
+  <!-- start mavlink -->
+  <include file="$(find mavros)/launch/apm.launch" />
+
+  <!-- start sonde -->
+  <!--include file="$(find ysi_exo)/launch/ysi_exo.launch">
+    <arg name="serial_port" value="/dev/ttyUSB1"/>
+  </include-->
+
+  <!-- depth and camera sensor nodes -->
+  <node pkg="atu_sonar" type="atu120at_node.py" name="atu_sonar" />
+  <!-- node pkg="usb_cam" type="usb_cam_node" name="usb_cam" launch-prefix="bash -c 'sleep $(arg usb_cam_node_start_delay); $0 $@' " /-->
+
+  <!-- Transform for getting the lidar tf in place -->
+  <node if="$(arg use_lidar)" pkg="tf" type="static_transform_publisher" name="lidar_tf_broadcaster" args="0.3 0 0.27 0 0 0 base_link velodyne 100" />
+  <node if="$(arg use_rgbd_camera)" pkg="tf" type="static_transform_publisher" name="rgbd_tf_broadcaster" args="0.57 0 0.2 0 0 0 base_link surface_cam 100" />
+
+  <!-- Lidar launch file -->
+  <include file="$(find velodyne_pointcloud)/launch/VLP16_points.launch">
+    <arg name="calibration" value="$(find velodyne_pointcloud)/params/VLP16db.yaml" />  
+  </include>
+
+  <!-- RGBD Camera launch file -->
+  <node name="usb_cam_surface" pkg="usb_cam" type="usb_cam_node" output="screen" launch-prefix="bash -c 'sleep $(arg usb_cam_underwater_start_delay); $0 $@'" >
+      <param name="video_device" value="$(arg usb_surface)" />
+      <param name="image_width" value="640" />
+      <param name="image_height" value="480" />
+      <param name="pixel_format" value="yuyv" />
+      <!--param name="io_method" value="mmap"/-->
+      <param name="auto_focus" value="false"/>
+      <param name="framerate" value="30"/>
+      <param name="camera_frame_id" value="surface_cam"/>
+      <param name="autoexposure" value="true"/>      
+  </node>
+
+  <!-- Underwater Camera launch file -->
+  <node name="usb_cam_underwater" pkg="usb_cam" type="usb_cam_node" output="screen" launch-prefix="bash -c 'sleep $(arg usb_cam_node_start_delay); $0 $@'" >
+      <param name="video_device" value="$(arg usb_underwater)" />
+      <param name="image_width" value="640" />
+      <param name="image_height" value="360" />
+      <param name="pixel_format" value="yuyv" />
+      <param name="io_method" value="mmap"/>
+      <param name="auto_focus" value="false"/>
+      <param name="framerate" value="30"/>
+      <param name="camera_frame_id" value="underwater_cam"/>
+      <param name="autoexposure" value="false"/>
+  </node>
+
+  <!--include file="$(find realsense2_camera)/launch/rs_camera.launch">
+    <arg name="external_manager" value="true"/>
+    <arg name="manager" value="velodyne_nodelet_manager" />
+  </include-->
+  
+  <!-- Record launch file -->
+  <include file="$(find cataboat_bringup)/launch/logger_online.launch" />
+
+  <!-- detection main algorithm -->
+  <include file="$(find catabot_detection)/launch/catabot_detection_online.launch" />
+
+</launch>
