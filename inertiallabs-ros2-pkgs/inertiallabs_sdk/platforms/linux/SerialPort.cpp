@@ -53,6 +53,8 @@ namespace IL {
         config.c_cflag = baudrate & ~(CSIZE | PARENB);
         config.c_cflag |= CS8 | CREAD | CLOCAL;
         config.c_lflag |= IEXTEN;
+        config.c_cc[VMIN]  = 0;   
+        config.c_cc[VTIME] = 0;   
         if (tcsetattr(fd, TCSANOW, &config) < 0) return 3;
         return 0;
     }
@@ -73,12 +75,12 @@ namespace IL {
 
     int SerialPort::read(char* buf, unsigned int size)
     {
-        if (!isatty(fd)) return -1;
+        // if (!isatty(fd)) return -1;
         pollfd fds;
         fds.fd = fd;
         fds.events = POLLIN;
         fds.revents = 0;
-        int result = poll(&fds, 1, timeout);
+        int result = poll(&fds, 1, 6);
         if (result < 0)	return -errno;
         if (!result) return 0;
         result = ::read(fd, buf, size);

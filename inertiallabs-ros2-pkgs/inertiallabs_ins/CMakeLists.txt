@@ -43,6 +43,8 @@ add_executable(il_ins
                ../inertiallabs_sdk/platforms/${IL_PLATFORM}/NetClient.cpp
 )
 
+
+
 ament_target_dependencies(il_ins
                           rclcpp
                           rclpy
@@ -59,5 +61,9 @@ endif()
 install(TARGETS il_ins
     DESTINATION
         lib/${PROJECT_NAME})
+
+install(DIRECTORY launch/
+  DESTINATION share/${PROJECT_NAME}/launch
+)
 
 ament_package()

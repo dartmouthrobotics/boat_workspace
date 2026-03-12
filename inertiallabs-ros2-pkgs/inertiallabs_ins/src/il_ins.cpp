@@ -2,6 +2,8 @@
 #include <unistd.h>
 #include <math.h>
 #include <stdlib.h>
+#include <sched.h>
+#include <string.h>
 
 #include <rclcpp/rclcpp.hpp>
 
@@ -182,19 +184,19 @@ void publishDevice(IL::INSDataStruct* data, void* contextPtr)
         imu_msg.header.stamp = timestamp;
         imu_msg.header.frame_id = context->imuFrameId;
 
-        // orientation (rpyToQuaternion already converts deg -> rad internally)
+        // orientation 
         tf2::Quaternion q = rpyToQuaternion(data->Roll, data->Pitch, data->Heading);
         imu_msg.orientation.x = q.x();
         imu_msg.orientation.y = q.y();
         imu_msg.orientation.z = q.z();
         imu_msg.orientation.w = q.w();
 
-        // linear_acceleration (m/s^2) — IL device outputs m/s^2, no conversion needed
+        // linear_acceleration (m/s^2) 
         imu_msg.linear_acceleration.x = data->Acc[0];
         imu_msg.linear_acceleration.y = data->Acc[1];
         imu_msg.linear_acceleration.z = data->Acc[2];
 
-        // angular_velocity (rad/s) — IL device outputs deg/s, must convert
+        // angular_velocity (rad/s)
         imu_msg.angular_velocity.x = data->Gyro[0] * M_PI / 180.0;
         imu_msg.angular_velocity.y = data->Gyro[1] * M_PI / 180.0;
         imu_msg.angular_velocity.z = data->Gyro[2] * M_PI / 180.0;
@@ -208,7 +210,7 @@ int main(int argc, char** argv)
     rclcpp::init(argc, argv);
     auto options = rclcpp::NodeOptions().allow_undeclared_parameters(true).automatically_declare_parameters_from_overrides(true);
     rclcpp::Node::SharedPtr node = rclcpp::Node::make_shared("il_ins", options);
-    rclcpp::Rate rate(100); // 100 hz
+    // rclcpp::Rate rate(100); // 100 hz
 
     std::string port("serial:/dev/ttyUSB0:460800");
     int insOutputFormat = 82; // 0x52
@@ -228,12 +230,12 @@ int main(int argc, char** argv)
     context.time_initialized = false;
 
     // Initializing Publishers
-    context.sensorDataPub = node->create_publisher<inertiallabs_msgs::msg::SensorData>("Inertial_Labs/sensor_data", 1);
-    context.insDataPub = node->create_publisher<inertiallabs_msgs::msg::InsData>("Inertial_Labs/ins_data", 1);
-    context.gpsDataPub = node->create_publisher<inertiallabs_msgs::msg::GpsData>("Inertial_Labs/gps_data", 1);
-    context.gnssDataPub = node->create_publisher<inertiallabs_msgs::msg::GnssData>("Inertial_Labs/gnss_data", 1);
-    context.marineDataPub = node->create_publisher<inertiallabs_msgs::msg::MarineData>("Inertial_Labs/marine_data", 1);
-    context.imuDataPub = node->create_publisher<sensor_msgs::msg::Imu>("imu/data", 1);
+    context.sensorDataPub = node->create_publisher<inertiallabs_msgs::msg::SensorData>("Inertial_Labs/sensor_data", 10);
+    context.insDataPub = node->create_publisher<inertiallabs_msgs::msg::InsData>("Inertial_Labs/ins_data", 10);
+    context.gpsDataPub = node->create_publisher<inertiallabs_msgs::msg::GpsData>("Inertial_Labs/gps_data", 10);
+    context.gnssDataPub = node->create_publisher<inertiallabs_msgs::msg::GnssData>("Inertial_Labs/gnss_data", 10);
+    context.marineDataPub = node->create_publisher<inertiallabs_msgs::msg::MarineData>("Inertial_Labs/marine_data", 10);
+    context.imuDataPub = node->create_publisher<sensor_msgs::msg::Imu>("imu/data", 10);
 
     // Communication with the device
     RCLCPP_INFO(node->get_logger(), "Connecting to INS at URL %s\n", port.c_str());
@@ -257,6 +259,12 @@ int main(int argc, char** argv)
     RCLCPP_INFO(node->get_logger(), "Found INS S/N %s\n", serialNumber.c_str());
     context.imuFrameId = serialNumber;
 
+    struct sched_param sp;
+    sp.sched_priority = 99;
+    if (sched_setscheduler(0, SCHED_FIFO, &sp) != 0) {
+        RCLCPP_WARN(node->get_logger(), "Could not set realtime priority: %s", strerror(errno));
+    }
+
     il_err = ins.start(insOutputFormat);
     if (il_err)
     {
@@ -270,7 +278,9 @@ int main(int argc, char** argv)
     RCLCPP_INFO(node->get_logger(), "Publishing at %d Hz\n", devParams.dataRate);
     RCLCPP_INFO(node->get_logger(), "Run \"rostopic list\" to see all topics.\nRun \"rostopic echo <topic-name>\" to see the data from sensor");
 
-    rclcpp::spin(node);
+    rclcpp::executors::MultiThreadedExecutor executor;
+    executor.add_node(node);
+    executor.spin();
     std::cout << "Stopping INS... " << std::flush;
     ins.stop();
     std::cout << "Disconnecting... " << std::flush;

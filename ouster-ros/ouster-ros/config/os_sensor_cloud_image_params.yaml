@@ -9,7 +9,7 @@ ouster/os_sensor:
     mtp_dest: ''
     mtp_main: false
     lidar_mode: ''
-    timestamp_mode: ''
+    timestamp_mode: 'TIME_FROM_ROS_TIME'
     udp_profile_lidar: ''
     metadata: ''
     lidar_port: 0
@@ -28,7 +28,7 @@ ouster/os_cloud:
     imu_frame: os_imu
     point_cloud_frame: os_lidar
     pub_static_tf: true
-    timestamp_mode: ''  # this value needs to match os_sensor/timestamp_mode
+    timestamp_mode: 'TIME_FROM_ROS_TIME'  # this value needs to match os_sensor/timestamp_mode
     ptp_utc_tai_offset: -37.0 # UTC/TAI offset in seconds to apply when using TIME_FROM_PTP_1588
     proc_mask: IMU|PCL|SCAN|TLM # pick IMU, PCL, SCAN, TLM or any combination of the 4 options
     use_system_default_qos: false # needs to match the value defined for os_sensor node

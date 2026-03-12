@@ -3,19 +3,22 @@
   <arg name="use_lidar" default="true"/>
   <arg name="lidar_ouster" default="true"/>
   <arg name="use_surface_camera" default="true"/>
+  <arg name="use_miniAHRS" default="true"/>  
+  <arg name="use_ZEDX" default="true"/>
+  <arg name="use_logging" default="true"/>  
+  <arg name="use_pixhawk" default="true"/>
+  
   <arg name="use_underwater_camera" default="false"/>
   <arg name="use_sonde" default="false"/>
   <arg name="use_sonar" default="false"/>
   <arg name="use_sidescan" default="false"/>
-  <arg name="use_logging" default="true"/>  
-  <arg name="use_pixhawk" default="true"/>
 
   <!-- time delays -->
   <arg name="usb_cam_node_start_delay" default="3.0" />
   <arg name="usb_cam_underwater_start_delay" default="1.0" />
   
   <!-- usb parameters under udev rules --> 
-  <!-- TODO underwater cam -->
+  <!-- NO underwater cam -->
   <arg name="usb_underwater" default="/dev/video2"/>
   
   <arg name="usb_surface" default="/dev/video0"/> <!-- /dev/surface_cam"/ -->
