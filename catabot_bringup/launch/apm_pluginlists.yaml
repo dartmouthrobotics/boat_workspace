@@ -40,6 +40,8 @@
       - vision_pose
       - vision_speed
       - wind_estimation
+      - companion_process
+
 
     # plugin_allowlist:
     #   - 'sys_*'

@@ -47,7 +47,7 @@ def generate_launch_description():
         DeclareLaunchArgument("usb_cam_underwater_start_delay", default_value="1.0"),
 
         # --- device paths ---
-        DeclareLaunchArgument("usb_surface",      default_value="/dev/video2"),
+        DeclareLaunchArgument("usb_surface",      default_value="/dev/surface_cam"),
         DeclareLaunchArgument("usb_underwater",   default_value="/dev/video0"),
         DeclareLaunchArgument("usb_sonde",        default_value="/dev/ysi_sonde"),
         DeclareLaunchArgument("usb_sonar",        default_value="/dev/sonar"),
@@ -188,6 +188,7 @@ def generate_launch_description():
     miniahrs_group = GroupAction(
         condition=IfCondition(use_miniAHRS),
         actions=[
+            PushRosNamespace('miniAHRS'),
             IncludeLaunchDescription(
                 AnyLaunchDescriptionSource([
                     PathJoinSubstitution([
@@ -198,7 +199,7 @@ def generate_launch_description():
                     "ins_url":           miniahrs_url,
                     "ins_output_format": ins_output_format,
                 }.items(),
-            )
+            ),
         ],
     )
 
@@ -298,6 +299,7 @@ def generate_launch_description():
                         package="usb_cam",
                         executable="usb_cam_node_exe",
                         name="usb_cam_surface",
+                        namespace="usb_cam_surface",
                         parameters=[{
                             "video_device":    usb_surface,
                             "image_width":     640,
@@ -305,6 +307,7 @@ def generate_launch_description():
                             "pixel_format":    "yuyv",
                             "auto_focus":      False,
                             "framerate":       30.0,
+                            "camera_name":     "surface_cam",
                             "camera_frame_id": "surface_cam",
                             "autoexposure":    True,
                         }],

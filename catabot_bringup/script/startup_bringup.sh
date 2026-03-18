@@ -14,11 +14,11 @@ until [ "$(check_ipaddr)" -gt 2 ]; do
     sleep 2
 done
 
-until mountpoint -q /media/catabot-5/data; do
+until mountpoint -q /mnt/nova_ssd; do
     echo "Waiting for NVMe..."
     sleep 2
 done
-mkdir -p /media/catabot-5/data/datalog/rosbag2
+#mkdir -p /media/catabot-5/data/datalog/rosbag2
 
 source "${SCRIPT_DIR}/common_include.sh"
 
@@ -27,4 +27,4 @@ ros2 launch catabot_bringup catabot_bringup.launch.py \
     use_miniAHRS:=true \
     use_ZEDX:=true \
     use_lidar:=true \
-    bag_dir:=/media/catabot-5/data/datalog/rosbag2
+    bag_dir:=/home/catabot-5/datalog/rosbag2

@@ -24,7 +24,7 @@ def generate_launch_description():
 
     bag_dir_arg = DeclareLaunchArgument(
         "bag_dir",
-        default_value="/media/catabot-5/data/datalog/rosbag2",
+        default_value="/home/catabot-5/datalog/rosbag2",
         description="Root directory where ros2 bag folders are saved",
     )
 
@@ -101,26 +101,34 @@ def generate_launch_description():
         # ---------------------------------------------------------------- #
         #  ZED X camera                                                    #
         # ---------------------------------------------------------------- #
-        "/blue/zed/left/color/rect/image/compressed",
-        "/blue/zed/left/color/rect/camera_info",
+        "/blue/zed/left/color/raw/image/compressed",
+        "/blue/zed/left/color/raw/camera_info",
+        "/blue/zed/right/color/raw/image/compressed",
+        "/blue/zed/right/color/raw/camera_info",
         "/blue/zed/depth/depth_registered",
         "/blue/zed/pose",
         "/blue/zed/odom",
         "/blue/zed/imu/data",
-        "/green/zed/left/color/rect/image/compressed",
-        "/green/zed/left/color/rect/camera_info",
+        "/green/zed/left/color/raw/image/compressed",
+        "/green/zed/left/color/raw/camera_info",
+        "/green/zed/right/color/raw/image/compressed",
+        "/green/zed/right/color/raw/camera_info",
         "/green/zed/depth/depth_registered",
         "/green/zed/pose",
         "/green/zed/odom",
         "/green/zed/imu/data",
-        "/red/zed/left/color/rect/image/compressed",
-        "/red/zed/left/color/rect/camera_info",
+        "/red/zed/left/color/raw/image/compressed",
+        "/red/zed/left/color/raw/camera_info",
+        "/red/zed/right/color/raw/image/compressed",
+        "/red/zed/right/color/raw/camera_info",
         "/red/zed/depth/depth_registered",
         "/red/zed/pose",
         "/red/zed/odom",
         "/red/zed/imu/data",
-        "/pink/zed/left/color/rect/image/compressed",
-        "/pink/zed/left/color/rect/camera_info",
+        "/pink/zed/left/color/raw/image/compressed",
+        "/pink/zed/left/color/raw/camera_info",
+        "/pink/zed/right/color/raw/image/compressed",
+        "/pink/zed/right/color/raw/camera_info",
         "/pink/zed/depth/depth_registered",
         "/pink/zed/pose",
         "/pink/zed/odom",
@@ -129,12 +137,12 @@ def generate_launch_description():
         # ---------------------------------------------------------------- #
         #  InertialLabs miniAHRS                                            #
         # ---------------------------------------------------------------- #
-        "/Inertial_Labs/ins_data",
-        "/Inertial_Labs/sensor_data",
-        "/Inertial_Labs/gnss_data",
-        "/Inertial_Labs/gps_data",
-        "/Inertial_Labs/marine_data",
-        "/imu/data",
+        "/miniAHRS/Inertial_Labs/ins_data",
+        "/miniAHRS/Inertial_Labs/sensor_data",
+        "/miniAHRS/Inertial_Labs/gnss_data",
+        "/miniAHRS/Inertial_Labs/gps_data",
+        "/miniAHRS/Inertial_Labs/marine_data",
+        "/miniAHRS/imu/data",
 
         # ---------------------------------------------------------------- #
         #  Surface USB camera                                               #
