@@ -1,0 +1,3 @@
+[submodule "inertiallabs-ros2-pkgs"]
+	path = inertiallabs-ros2-pkgs
+	url = https://github.com/dartmouthrobotics/inertiallabs-ros2-pkgs.git
