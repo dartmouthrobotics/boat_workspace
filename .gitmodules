@@ -14,7 +14,8 @@
 	url = https://github.com/stereolabs/zed-ros2-wrapper
 [submodule "rosbag2_composable_recorder"]
 	path = rosbag2_composable_recorder
-	url = https://github.com/berndpfrommer/rosbag2_composable_recorder.git
+	url = https://github.com/quattrinili/rosbag2_composable_recorder.git
+	branch = fix-start_recording_immediately
 [submodule "zed_mcap_recorder"]
 	path = zed_mcap_recorder
 	url = https://github.com/dartmouthrobotics/zed_mcap_recorder.git
