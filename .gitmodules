@@ -1,3 +1,7 @@
 [submodule "inertiallabs-ros2-pkgs"]
 	path = inertiallabs-ros2-pkgs
 	url = https://github.com/dartmouthrobotics/inertiallabs-ros2-pkgs.git
+[submodule "catabot_bringup"]
+	path = catabot_bringup
+	url = https://github.com/dartmouthrobotics/catabot_bringup.git
+	branch = catabot-4-ros2
