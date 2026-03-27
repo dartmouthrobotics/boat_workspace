@@ -5,3 +5,7 @@
 	path = catabot_bringup
 	url = https://github.com/dartmouthrobotics/catabot_bringup.git
 	branch = catabot-4-ros2
+[submodule "ouster-ros"]
+	path = ouster-ros
+	url = https://github.com/ouster-lidar/ouster-ros.git
+	branch = ros2
